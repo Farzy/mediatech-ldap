@@ -1,0 +1,242 @@
+dn: dc=mediatech,dc=fr
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: mediatech.fr
+dc: mediatech
+structuralObjectClass: organization
+entryUUID: a6cdcd9e-ca31-102d-8f37-87af196d08ea
+creatorsName:
+createTimestamp: 20090501002042Z
+entryCSN: 20090501002042.769115Z#000000#000#000000
+modifiersName:
+modifyTimestamp: 20090501002042Z
+
+dn: cn=admin,dc=mediatech,dc=fr
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword:: e2NyeXB0fU40cG9YRUQ3ZXgvQjY=
+structuralObjectClass: organizationalRole
+entryUUID: a6d27542-ca31-102d-8f38-87af196d08ea
+creatorsName:
+createTimestamp: 20090501002042Z
+entryCSN: 20090501002042.799807Z#000000#000#000000
+modifiersName:
+modifyTimestamp: 20090501002042Z
+
+dn: ou=Internal,dc=mediatech,dc=fr
+objectClass: organizationalUnit
+objectClass: top
+structuralObjectClass: organizationalUnit
+entryUUID: 8f4a4e78-ca35-102d-8a7b-59f168301170
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090501004841Z
+ou: Internal
+entryCSN: 20090504165521.301676Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504165521Z
+
+dn: ou=Customers,dc=mediatech,dc=fr
+objectClass: organizationalUnit
+objectClass: top
+structuralObjectClass: organizationalUnit
+entryUUID: c4cf43b6-ca7e-102d-8a7c-59f168301170
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090501093244Z
+ou: Customers
+entryCSN: 20090501093256.459456Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090501093256Z
+
+dn: ou=Customer Archives,dc=mediatech,dc=fr
+ou: Customer Archives
+objectClass: organizationalUnit
+objectClass: top
+structuralObjectClass: organizationalUnit
+entryUUID: c1ae64d4-cd24-102d-84d7-014a0e2df51e
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504182557Z
+description: Storage area for archived or deleted customers
+entryCSN: 20090504182655.118923Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504182655Z
+
+dn: o=Autoworld,ou=Customers,dc=mediatech,dc=fr
+mtStatus: online
+uniqueIdentifier: 1234
+objectClass: mtOrganization
+objectClass: organization
+objectClass: top
+description: Une world company
+o: Autoworld
+structuralObjectClass: mtOrganization
+entryUUID: e912e194-cd29-102d-9de1-d562d6e45735
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504190251Z
+entryCSN: 20090504190251.466137Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504190251Z
+
+dn: o=TBWA,ou=Customers,dc=mediatech,dc=fr
+postalCode: 92100
+l: Boulogne Billancourt
+objectClass: mtOrganization
+objectClass: organization
+objectClass: top
+c: France
+mtMonthlyQuota: 10
+mtStatus: online
+structuralObjectClass: mtOrganization
+entryUUID: 895f982c-cd2a-102d-9de2-d562d6e45735
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504190720Z
+o: TBWA
+uniqueIdentifier: 34542
+description: Pub pub !
+facsimileTelephoneNumber: +33 1 43 54 11 11
+postalAddress: 162-164 rue de Billancourt
+telephoneNumber: +33 1 45 11 22 33
+entryCSN: 20090504190955.132102Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504190955Z
+
+dn: o=Autoworld France,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
+mtMonthlyQuota: 10
+o: Autoworld France
+postOfficeBox: Cedex 3454
+telephoneNumber: +33 1 45 43 54 65
+l: Boulogne Billancourt
+objectClass: mtOrganization
+objectClass: organization
+objectClass: top
+facsimileTelephoneNumber: +33 1 43 54 76 87
+mtStatus: online
+postalAddress:: QsOidGltZW50IDQkNSBydWUgZGUgUGFyaXMk
+c: France
+postalCode: 92100
+uniqueIdentifier: 1234FR
+description: Une world company
+structuralObjectClass: mtOrganization
+entryUUID: aea227d0-cd2a-102d-9de3-d562d6e45735
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504190822Z
+entryCSN: 20090504190822.916256Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504190822Z
+
+dn: o=Autoworld Italy,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
+o: Autoworld Italy
+objectClass: mtOrganization
+objectClass: organization
+objectClass: top
+uniqueIdentifier: 1234IT
+description: Une world company
+mtStatus: online
+structuralObjectClass: mtOrganization
+entryUUID: 018ab5f2-cd2b-102d-9de4-d562d6e45735
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504191042Z
+c: Italie
+facsimileTelephoneNumber: +45 33 44 55 66
+l: Milan
+mtMonthlyQuota: 20
+postalAddress: 43 rue Parmesan
+postalCode: 4300
+telephoneNumber: +45 5544 554
+entryCSN: 20090504191131.808165Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504191131Z
+
+dn: o=Mediatech,ou=Internal,dc=mediatech,dc=fr
+mtStatus: online
+uniqueIdentifier: 0001
+objectClass: mtOrganization
+objectClass: organization
+objectClass: top
+o: Mediatech
+structuralObjectClass: mtOrganization
+entryUUID: 3b25ab28-cd2b-102d-9de5-d562d6e45735
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504191218Z
+description: Nous !
+entryCSN: 20090504191227.760913Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504191227Z
+
+dn: cn=All Options,ou=Internal,dc=mediatech,dc=fr
+objectClass: mtCustomerOptionList
+objectClass: top
+mtCustomerOption:: UmVwb3J0aW5nIEfDqW9sb2NhbGlzYXRpb24=
+mtCustomerOption: Gestion du nombre de connexions
+mtCustomerOption: Webinar
+mtCustomerOption: WebTV
+mtCustomerOption: Encodage HQ
+mtCustomerOption: Classement
+mtCustomerOption: Filtrage Geoloc
+mtCustomerOption: Geo Blocking
+cn: All Options
+structuralObjectClass: mtCustomerOptionList
+entryUUID: f915a4e6-cd33-102d-8058-71fd1e276fd5
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504201453Z
+entryCSN: 20090504201453.295089Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504201453Z
+
+dn: cn=options,o=TBWA,ou=Customers,dc=mediatech,dc=fr
+objectClass: mtCustomerOptionList
+objectClass: top
+mtCustomerOption: Webinar
+mtCustomerOption: WebTV
+mtCustomerOption: Classement
+structuralObjectClass: mtCustomerOptionList
+entryUUID: 05481aa0-cd34-102d-8059-71fd1e276fd5
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504201513Z
+cn: options
+entryCSN: 20090504201534.646933Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504201534Z
+
+dn: cn=options,o=Autoworld France,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
+objectClass: mtCustomerOptionList
+objectClass: top
+mtCustomerOption:: UmVwb3J0aW5nIEfDqW9sb2NhbGlzYXRpb24=
+mtCustomerOption: Gestion du nombre de connexions
+mtCustomerOption: Webinar
+mtCustomerOption: WebTV
+mtCustomerOption: Encodage HQ
+mtCustomerOption: Classement
+mtCustomerOption: Filtrage Geoloc
+mtCustomerOption: Geo Blocking
+structuralObjectClass: mtCustomerOptionList
+entryUUID: 152f6a22-cd34-102d-805a-71fd1e276fd5
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504201540Z
+cn: options
+entryCSN: 20090504201705.577740Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504201705Z
+
+dn: cn=options,o=Autoworld Italy,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
+objectClass: mtCustomerOptionList
+objectClass: top
+mtCustomerOption:: UmVwb3J0aW5nIEfDqW9sb2NhbGlzYXRpb24=
+mtCustomerOption: Gestion du nombre de connexions
+mtCustomerOption: Webinar
+mtCustomerOption: WebTV
+mtCustomerOption: Encodage HQ
+mtCustomerOption: Classement
+mtCustomerOption: Filtrage Geoloc
+mtCustomerOption: Geo Blocking
+structuralObjectClass: mtCustomerOptionList
+entryUUID: 17437560-cd34-102d-805b-71fd1e276fd5
+creatorsName: cn=admin,dc=mediatech,dc=fr
+createTimestamp: 20090504201543Z
+cn: options
+entryCSN: 20090504201710.082547Z#000000#000#000000
+modifiersName: cn=admin,dc=mediatech,dc=fr
+modifyTimestamp: 20090504201710Z
+
