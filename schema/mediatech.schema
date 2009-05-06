@@ -53,7 +53,7 @@ attributetype ( MediatechAttributeType:2
 
 # Aliases for the 'uid' attribute
 attributetype ( MediatechAttributeType:3
-	NAME 'mtUidAlias'
+	NAME 'mtAlias'
 	DESC 'login aliases'
 	SUP  uid )
 
@@ -86,5 +86,5 @@ objectClass ( MediatechObjectClass:3
 	NAME 'mtPerson'
 	DESC 'Mediatech person description (for internal and customer employees)'
 	SUP  inetOrgPerson STRUCTURAL
-	MAY  ( countryName $ mtUidAlias ) )
+	MAY  ( countryName $ mtAlias ) )
 
