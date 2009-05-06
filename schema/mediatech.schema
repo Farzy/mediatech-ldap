@@ -71,7 +71,7 @@ objectClass ( MediatechObjectClass:1
 	NAME 'mtOrganization'
 	DESC 'Mediatech Organizational Object'
         SUP  organization STRUCTURAL
-	MUST ( uniqueIdentifier $ mtStatus )
+	MUST ( uid $ mtStatus )
 	MAY  ( countryName $ mtMonthlyQuota $ mtCustomerOption ) )
 
 # Customer options
