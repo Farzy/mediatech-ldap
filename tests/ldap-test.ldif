@@ -23,12 +23,6 @@ objectClass: organizationalUnit
 objectClass: top
 ou: Customers
 
-dn: ou=Customer Archives,dc=mediatech,dc=fr
-ou: Customer Archives
-objectClass: organizationalUnit
-objectClass: top
-description: Storage area for archived or deleted customers
-
 dn: o=Autoworld,ou=Customers,dc=mediatech,dc=fr
 mtStatus: online
 objectClass: mtOrganization
@@ -173,11 +167,11 @@ uid: asimonneau
 employeeType: superadmin
 cn: Antony Simonneau
 mtAlias: antony
-userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
- =
 title: Directeur Technique
 l: Montigny les Cormeilles
 facsimileTelephoneNumber: +33 1 65 87 93 21
+userPassword:: e1NTSEF9OE1jWHRLK050c0R3SXJaZDhOVXoyWjdYQzlTd1oyaDYyK1l4NGc9PQ=
+ =
 
 dn: ou=Servers,dc=mediatech,dc=fr
 objectClass: organizationalUnit
@@ -300,4 +294,42 @@ mtAlias: will
 mtAlias: willy
 userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
  =
+
+dn: cn=Autoworld MetaAdmin,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
+employeeType: admin
+objectClass: mtPerson
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+mail: contact@autoworld.com
+givenName: Autoworld
+uid: autoworldadmin
+userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
+ =
+sn: MetaAdmin
+cn: Autoworld MetaAdmin
+
+dn: o=Oldy,ou=Customers,dc=mediatech,dc=fr
+postalCode: 92100
+o: Oldy
+facsimileTelephoneNumber: +33 1 43 54 11 11
+l: Boulogne Billancourt
+postalAddress: 162-164 rue de Billancourt
+objectClass: mtOrganization
+objectClass: organization
+objectClass: top
+telephoneNumber: +33 1 45 11 22 33
+uid: 35345
+mtMonthlyQuota: 10
+c: France
+mtStatus: archived
+
+dn: cn=options,o=Oldy,ou=Customers,dc=mediatech,dc=fr
+objectClass: mtCustomerOptionList
+objectClass: top
+mtOption: Webinar
+mtOption: WebTV
+mtOption: Classement
+cn: options
 
