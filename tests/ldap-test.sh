@@ -91,7 +91,7 @@ ldapmodify_admin() { ${LDAPMODIFY} -x -H "${LDAP_URI}" -D "${LDAP_ADMIN_DN}" -w 
 
 
 # We really load and start the slapd server in the first test
-testLoadAndStartSlapd() {
+test_Load_and_Start_slapd() {
   local RC
 
   sudo -u openldap ${SLAPADD} -f ${LDAP_CONFDIR}/slapd.conf -l ldap-test.ldif 
@@ -104,7 +104,7 @@ testLoadAndStartSlapd() {
   assertTrue "Failed to start slapd server" "[ -f ${LDAP_RUNDIR}/slapd.pid ]"
 }
 
-testSSLConnection() {
+test_SSL_Connection() {
   local OUTPUT RC
 
   echo "" | openssl s_client -CApath /etc/ssl/certs -connect ${LDAPS_HOST}:${LDAPS_PORT} > ${TMPFILE1} 2>/dev/null
@@ -113,7 +113,7 @@ testSSLConnection() {
   assertTrue "Cannot connect to LDAP/SSL or certificate chain invalid" $RC
 }
 
-testFindCompany() {
+test_Find_Company() {
   local OUTPUT RC
   
   ldapsearch_admin -LLL '(&(objectClass=mtOrganization)(o=TBWA))' > ${TMPFILE1}
@@ -127,7 +127,7 @@ testFindCompany() {
   assertTrue "Cannot find customer attribute 'mtStatus'" $RC
 }
 
-testFindMediatech() {
+test_Find_Mediatech() {
   local OUTPUT GREPOUT RC
 
   ldapsearch_admin -b "ou=Internal,$LDAP_BASE" -LLL '(objectClass=mtOrganization)' > ${TMPFILE1}
@@ -139,7 +139,7 @@ testFindMediatech() {
   assertEquals "Cannot find Mediatech object" "o: Mediatech" "${GREPOUT}" 
 }
 
-testModifyCompany() {
+test_Modify_Company() {
   local OUTPUT GREPOUT RC
 
   ldapsearch_admin -LLL '(&(objectClass=mtOrganization)(o=TBWA)(mtStatus=online))' > ${TMPFILE1}
@@ -153,7 +153,7 @@ changetype: modify
 replace: mtStatus
 mtStatus: offline
 EOT
-  ldapmodify_admin -f ${TMPFILE1}
+  ldapmodify_admin -f ${TMPFILE1} >/dev/null
   RC=$?
   assertTrue "LDAP modification failed" $RC || return
 
@@ -163,10 +163,43 @@ EOT
   assertEquals "Cannot find TBWA customer with offline status" 1 "${GREPOUT}"
 }
 
-testFindMultipleCompanies() {
+test_Find_Multiple_Companies() {
+  local OUTPUT GREPOUT RC ROOT_COMPANY_DN
+
+  # Find the root company "Autoworld"
+  ROOT_COMPANY_DN=$(ldapsearch_admin -LLL '(&(objectClass=mtOrganization)(o=Autoworld))' o | sed -n -e 's/^dn: //p')
+  RC=$?
+  assertTrue "Cannot find root company's DN" $RC
+  assertEquals "o=Autoworld returned a wrong company" "o=Autoworld,ou=Customers,dc=mediatech,dc=fr" "${ROOT_COMPANY_DN}"
+
+  # Now find the root company's sub-companies
+  ldapsearch_admin -LLL -b "${ROOT_COMPANY_DN}" -s one '(objectClass=mtOrganization)' o | sed -n -e 's/^o: //p' | sort > ${TMPFILE1}
+  assertEquals "Wrong number of subcompanies" 2 $(cat ${TMPFILE1} | wc -l)
+  assertEquals "Subcompany one is not the expected name" "Autoworld France" "$(head -n 1 ${TMPFILE1})"
+  assertEquals "Subcompany two is not the expected name" "Autoworld Italy" "$(tail -n 1 ${TMPFILE1})"
+}
+
+test_Find_Internal_User() {
   local OUTPUT GREPOUT RC
 
-  ldapsearch_admin -LLL '(&(objectClass=mtOrganization)(o=Autoworld))' > ${TMPFILE1}
+  OUTPUT=$(ldapsearch_admin -LLL -b "ou=Internal,$LDAP_BASE" '(&(objectClass=mtPerson)(uid=asimonneau))' uid | head -n 1)
+  assertEquals "Cannot find Mediatech user" 'dn: cn=Antony Simonneau,o=Mediatech,ou=Internal,dc=mediatech,dc=fr' "${OUTPUT}"
+  fail "TODO"
+}
+
+test_Normal_User_Can_Only_Bind() {
+  local OUTPUT GREPOUT RC
+
+  USERDN="cn=Antony Simonneau,o=Mediatech,ou=Internal,${LDAP_BASE}"
+  OUTPUT=$(${LDAPWHOAMI} -x -H ${LDAP_URI} -D "${USERDN}" -w pipo)
+  RC=$?
+  assertTrue "User cannot authenticate correctly" $RC
+  assertEquals "ldapwhoami returned wrong user DN" "dn:${USERDN}" "${OUTPUT}"
+  fail "TODO"
+}
+
+test_Normal_User_Cannot_Spoof_Mediatech_Authentication() {
+  fail "TODO"
 }
 
 
