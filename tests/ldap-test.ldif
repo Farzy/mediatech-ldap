@@ -154,3 +154,150 @@ mtOption: readonly
 description: List of all authorized user types
 cn: All User Types
 
+dn: cn=Antony Simonneau,o=Mediatech,ou=Internal,dc=mediatech,dc=fr
+postalCode: 95123
+mobile: +33 6 12 34 56 78
+sn: Simonneau
+postalAddress: 1 rue de la Ville
+objectClass: mtPerson
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+postOfficeBox: CEDEX 42
+c: France
+mail: antony.simonneau@mediatech.fr
+telephoneNumber: +33 1 54 32 65 76
+givenName: Antony
+uid: asimonneau
+employeeType: superadmin
+cn: Antony Simonneau
+mtAlias: antony
+userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
+ =
+title: Directeur Technique
+l: Montigny les Cormeilles
+facsimileTelephoneNumber: +33 1 65 87 93 21
+
+dn: ou=Servers,dc=mediatech,dc=fr
+objectClass: organizationalUnit
+objectClass: top
+ou: Servers
+description: Dedicated customer servers
+
+dn: cn=dedibox1,ou=Servers,dc=mediatech,dc=fr
+owner: o=TBWA,ou=Customers,dc=mediatech,dc=fr
+objectClass: mtServer
+objectClass: top
+mtDate: 2009-10-10
+host: dedi1.mediatech.fr
+ipHostNumber: 10.0.0.1
+cn: dedibox1
+
+dn: cn=dedibox2,ou=Servers,dc=mediatech,dc=fr
+owner: o=Autoworld France,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
+objectClass: mtServer
+objectClass: top
+mtDate: 2010-10-10
+host: dedi2.mediatech.fr
+ipHostNumber: 10.0.0.2
+cn: dedibox2
+
+dn: cn=dedibox3,ou=Servers,dc=mediatech,dc=fr
+objectClass: mtServer
+objectClass: top
+host: dedi3.mediatech.fr
+ipHostNumber: 10.0.0.3
+cn: dedibox3
+
+dn: cn=reader,dc=mediatech,dc=fr
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+userPassword:: e1NTSEF9SVFraUhnT0JRM2Z1bUhybTAvOXBoUytEWGNzUnhkUmdaME45eUE9PQ=
+ =
+description: Read only access to the whole directory
+cn: reader
+
+dn: cn=Jean Dupond,o=TBWA,ou=Customers,dc=mediatech,dc=fr
+mobile: +33 6 12 34 56 78
+employeeType: admin
+userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
+ =
+postalAddress: 1 rue de Paris
+givenName: Jean
+uid: jdupond
+telephoneNumber: +33 1 54 32 65 76
+mail: jdupond@tbwa.fr
+cn: Jean Dupond
+postalCode: 75001
+objectClass: mtPerson
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+postOfficeBox: CEDEX 42
+mtAlias: dupond
+l: Paris
+sn: Dupond
+facsimileTelephoneNumber: +33 1 65 87 93 21
+c: France
+title: Directeur R&D
+
+dn: cn=Michel Duc,o=TBWA,ou=Customers,dc=mediatech,dc=fr
+postalCode: 75001
+mobile: +33 6 12 34 56 78
+sn: Dupond
+facsimileTelephoneNumber: +33 1 65 87 93 21
+l: Paris
+postalAddress: 1 rue de Paris
+objectClass: mtPerson
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+postOfficeBox: CEDEX 42
+mail: mduc@tbwa.fr
+telephoneNumber: +33 1 54 32 65 76
+givenName: Michel
+uid: mduc
+employeeType: user
+c: France
+cn: Michel Duc
+title: Webmaster
+userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
+ =
+
+dn: cn=John Doe,o=Autoworld France,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
+sn: Dupond
+objectClass: mtPerson
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+mail: jdoe@fr.autoworld.com
+givenName: John
+uid: jdoe
+employeeType: admin
+cn: John Doe
+mtAlias: johnny
+userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
+ =
+
+dn: cn=Will Smith,o=Autoworld France,o=Autoworld,ou=Customers,dc=mediatech,dc=
+ fr
+sn: Dupond
+objectClass: mtPerson
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+mail: wsmith@fr.autoworld.com
+givenName: Will
+uid: wsmith
+employeeType: readonly
+cn: Will Smith
+mtAlias: will
+mtAlias: willy
+userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
+ =
+
