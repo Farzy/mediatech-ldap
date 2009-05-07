@@ -179,30 +179,30 @@ objectClass: top
 ou: Servers
 description: Dedicated customer servers
 
-dn: cn=dedibox1,ou=Servers,dc=mediatech,dc=fr
+dn: mtServerName=dedibox1,ou=Servers,dc=mediatech,dc=fr
 owner: o=TBWA,ou=Customers,dc=mediatech,dc=fr
 objectClass: mtServer
 objectClass: top
 mtDate: 2009-10-10
 host: dedi1.mediatech.fr
 ipHostNumber: 10.0.0.1
-cn: dedibox1
+mtServerName: dedibox1
 
-dn: cn=dedibox2,ou=Servers,dc=mediatech,dc=fr
+dn: mtServerName=dedibox2,ou=Servers,dc=mediatech,dc=fr
 owner: o=Autoworld France,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
 objectClass: mtServer
 objectClass: top
 mtDate: 2010-10-10
 host: dedi2.mediatech.fr
 ipHostNumber: 10.0.0.2
-cn: dedibox2
+mtServerName: dedibox2
 
-dn: cn=dedibox3,ou=Servers,dc=mediatech,dc=fr
+dn: mtServerName=dedibox3,ou=Servers,dc=mediatech,dc=fr
 objectClass: mtServer
 objectClass: top
 host: dedi3.mediatech.fr
 ipHostNumber: 10.0.0.3
-cn: dedibox3
+mtServerName: dedibox3
 
 dn: cn=reader,dc=mediatech,dc=fr
 objectClass: simpleSecurityObject

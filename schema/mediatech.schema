@@ -71,6 +71,33 @@ attributetype ( MediatechAttributeType:5
 	DESC 'Generic date field'
 	SUP  name )
 
+# Server name
+attributetype ( MediatechAttributeType:6
+	NAME 'mtServerName'
+	DESC 'Server short name'
+	SINGLE-VALUE
+	SUP  name )
+
+# A single right's name
+attributetype ( MediatechAttributeType:7
+	NAME 'mtRightName'
+	DESC 'User right name'
+	SINGLE-VALUE
+	SUP  name )
+
+# A single right's type
+attributetype ( MediatechAttributeType:8
+	NAME 'mtRightType'
+	DESC 'User right type (boolean, string)'
+	SINGLE-VALUE
+	SUP  name )
+
+# A single right's value
+attributetype ( MediatechAttributeType:9
+	NAME 'mtRightValue'
+	DESC 'User right value. Can be multivalued'
+	SUP  name )
+
 
 # Mediatech objectClasses
 # -----------------------
@@ -103,6 +130,14 @@ objectClass ( MediatechObjectClass:4
 	NAME 'mtServer'
 	DESC 'Mediatech server description'
 	SUP  top STRUCTURAL
-	MUST ( cn $ ipHostNumber $ host )
+	MUST ( mtServerName $ ipHostNumber $ host )
 	MAY  ( description $ mtDate $ owner ) )
+
+# User rights on a server
+objectClass (MediatechObjectClass:5
+	NAME 'mtServerRight'
+	DESC 'Description of a user right for a given server'
+	SUP  top STRUCTURAL
+	MUST ( mtServerName )
+	MAY  ( mtRightName $ mtRightType $ mtRightValue ) )
 
