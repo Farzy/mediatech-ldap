@@ -49,9 +49,10 @@ oneTimeSetUp() {
   LDAP_DBDIR="${shunit_tmpDir}/var-lib-ldap"
   mkdir -p $LDAP_CONFDIR $LDAP_RUNDIR $LDAP_DBDIR
   cp -a /etc/ldap/* $LDAP_CONFDIR
-  # Copy the local schemas file over the production files, just in case
-  # the development version is newer
+  # Copy the local schemas and config files over the production files, just in case
+  # the development versions are newer
   cp ${TEST_DIR}/../schema/*.schema ${LDAP_CONFDIR}/schema
+  cp ${TEST_DIR}/../config/*.conf ${LDAP_CONFDIR}/
   sed -i -e "s#/etc/ldap#${LDAP_CONFDIR}#g" \
     -e "s#/var/run/slapd#${LDAP_RUNDIR}#g" \
     -e "s#/var/lib/ldap#${LDAP_DBDIR}#g" ${LDAP_CONFDIR}/slapd.conf
