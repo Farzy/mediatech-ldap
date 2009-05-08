@@ -319,11 +319,11 @@ objectClass: mtOrganization
 objectClass: organization
 objectClass: top
 telephoneNumber: +33 1 45 11 22 33
-mtMonthlyQuota: 10
 c: France
 mtStatus: archived
 uid: 35343
-facsimileTelephoneNumber: +33 1 43 54 11 12
+facsimileTelephoneNumber: +33 1 43 54 11 15
+mtMonthlyQuota: 30
 
 dn: cn=options,o=Oldy,ou=Customers,dc=mediatech,dc=fr
 objectClass: mtCustomerOptionList
