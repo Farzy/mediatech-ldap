@@ -36,3 +36,12 @@ install_config:
 export_ldap:
 	@echo "Exportation de la base LDAP de production en fichier LDIF de test"
 	slapcat | grep -Ev "(structuralObjectClass|entryUUID|creatorsName|createTimestamp|entryCSN|modifiersName|modifyTimestamp)" > $(TEST_DIR)/ldap-test.ldif
+
+sync_src:
+	@echo "Copie du répertoire de développement sur ldap2"
+	if [ "$$(hostname)" = "ldap1" ]; then \
+	    rsync -av --exclude "*.swp" --delete /usr/src/ldap/ ldap2:/usr/src/ldap; \
+	else \
+	    echo "ERREUR : Cette commande doit être lancée sur ldap1 uniquement"; \
+	fi
+
