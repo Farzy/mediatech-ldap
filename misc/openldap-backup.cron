@@ -1,0 +1,5 @@
+# OpenLDAP automated backup
+# Install this file as /etc/cron.d/openldap-backup
+
+# Backup every 4 hours, keep 40 copies, named by date.
+0 */4 * * *	root	slapcat > /var/backups/mediatech-backup.ldif 2>/dev/null && savelog -d -c 40 /var/backups/mediatech-backup.ldif >/dev/null

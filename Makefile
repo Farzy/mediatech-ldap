@@ -11,7 +11,7 @@ all:
 	@echo "Commandes disponibles :"
 	@echo " make tests : lance les tests"
 	@echo " make install_schema : installe le schéma LDAP Mediatech en production"
-	@echo " make install_config : installe le fichier de configuration slapd.conf production"
+	@echo " make install_config : installe les fichier de configuration slapd.conf, ldap.conf et le cron de backup en production"
 	@echo " make export_ldap : Recrée la base LDIF de test à partir de la base de production"
 	@echo " make diag : affiche quelques infos sur le Makefile"
 
@@ -29,8 +29,10 @@ install_schema:
 	/etc/init.d/slapd restart
 
 install_config:
-	@echo "Installation du schéma LDAP Mediatech et redémarrage d'OpenLDAP"
+	@echo "Installation de la configuration LDAP Mediatech, du cron de backup et redémarrage d'OpenLDAP"
 	cp config/slapd.conf /etc/ldap
+	cp config/ldap.conf /etc/ldap
+	cp misc/openldap-backup.cron /etc/cron.d/openldap-backup
 	/etc/init.d/slapd restart
 
 export_ldap:
