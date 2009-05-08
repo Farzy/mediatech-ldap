@@ -57,11 +57,12 @@ oneTimeSetUp() {
     -e "s#/var/lib/ldap#${LDAP_DBDIR}#g" ${LDAP_CONFDIR}/slapd.conf
   chown openldap:openldap $LDAP_RUNDIR $LDAP_DBDIR
   chmod 755 $LDAP_RUNDIR $LDAP_DBDIR
-  # The test LDAP server will be started by the first test
+  # The test LDAP server will be started by the first test,
+  # just kill an eventually forgotten test server
+  fuser -k 10389/tcp
 
   # Some temporary filenames
-  TMPFILE1=${shunit_tmpDir}/tmpfile1
-  TMPFILE2=${shunit_tmpDir}/tmpfile2
+  TMPFILE=${shunit_tmpDir}/tmpfile
 }
 
 oneTimeTearDown() {
@@ -72,7 +73,7 @@ oneTimeTearDown() {
 
 # Clean temp files between tests
 tearDown() {
-  rm -f ${TMPFILE1} ${TMPFILE2}
+  rm -f ${TMPFILE}
 }
 
 # --------------------------------
@@ -80,22 +81,31 @@ tearDown() {
 # --------------------------------
 
 
-ldapsearch_anon() { ${LDAPSEARCH} -x -H "${LDAP_URI}" -b "${LDAP_BASE}" "$@" ; }
-ldapsearch_admin() { ${LDAPSEARCH} -x -H "${LDAP_URI}" -b "${LDAP_BASE}" -D "${LDAP_ADMIN_DN}" -w "${LDAP_ADMIN_PW}" "$@" ; }
+ldapsearch_anon() { ${LDAPSEARCH} -LLL -x -H "${LDAP_URI}" -b "${LDAP_BASE}" "$@" ; }
+ldapsearch_admin() { ${LDAPSEARCH} -LLL -x -H "${LDAP_URI}" -b "${LDAP_BASE}" -D "${LDAP_ADMIN_DN}" -w "${LDAP_ADMIN_PW}" "$@" ; }
 ldapmodify_admin() { ${LDAPMODIFY} -x -H "${LDAP_URI}" -D "${LDAP_ADMIN_DN}" -w "${LDAP_ADMIN_PW}" "$@" ; }
 
-# Extract a given attribute's value from stdin (must be in LDIF format)
-# Argument #1 : attribute name
+# Extract a given attribute's value from a file or stdin (must be in LDIF format)
+# Argument #1: attribute name
+# Argument #2: filename. Optionnal, stdin will be used if not filename is given
 get_attr_value() {
-  local ATTR_NAME
+  local ATTR_NAME FILENAME
 
+  if [[ $# -lt 1 || $# -gt 2 ]]; then
+    fail "Missing attribute name in call to 'getAttributeValue' in unit test"
+    return
+  fi
   ATTR_NAME=$1
-  [ -z "${ATTR_NAME}" ] && { fail "Missing attribute name in call to 'getAttributeValue' in unit test" ; return; }
+  if [ $# -eq 2 ]; then
+    FILENAME=$2
+  else
+    FILENAME=-
+  fi
 
   # - The perl command joins splitted long lines back together. See
   #   http://www.openldap.org/lists/openldap-software/200504/msg00212.html
   # The 'sed' line extracts lines starting with 'attribute_name:'
-  cat - | perl -p -00 -e 's/\r\n //g; s/\n //g' | sed -n -e "s/^${ATTR_NAME}://p" | while read raw_value; do
+  cat ${FILENAME} | perl -p -00 -e 's/\r\n //g; s/\n //g' | sed -n -e "s/^${ATTR_NAME}://p" | while read raw_value; do
     # See if the line starts with ": ", in which case the attribute's value is base64 encoded,
     # otherwise it is in plain text and will begin with ' '.
     value="${raw_value#: }"
@@ -125,30 +135,29 @@ test_Load_and_Start_slapd() {
   ${SLAPD} -n "ldap-test" -h "${LDAPN_URI} ${LDAPS_URI} ldapi:///" -g openldap -u openldap -f ${LDAP_CONFDIR}/slapd.conf
   RC=$?
   assertTrue "Failed to start slapd server" "$RC" || startSkipping
-  sleep 1
+  sleep 0.5
   assertTrue "Failed to start slapd server" "[ -f ${LDAP_RUNDIR}/slapd.pid ]"
 }
 
 test_SSL_Connection() {
-  local OUTPUT RC
+  local RC
 
-  echo "" | openssl s_client -CApath /etc/ssl/certs -connect ${LDAPS_HOST}:${LDAPS_PORT} > ${TMPFILE1} 2>/dev/null
-  grep -q "Verify return code: 0 (ok)" ${TMPFILE1}
+  echo "" | openssl s_client -CApath /etc/ssl/certs -connect ${LDAPS_HOST}:${LDAPS_PORT} > ${TMPFILE} 2>/dev/null
+  grep -q "Verify return code: 0 (ok)" ${TMPFILE}
   RC=$?
   assertTrue "Cannot connect to LDAP/SSL or certificate chain invalid" "$RC"
 }
 
 test_Find_All_Customer_Options() {
-  local OUTPUT
+  local COUNT
 
-  # XXX : ldapsearch returns strings containing accents as base64, and cannot decode it automatically...
-  ldapsearch_admin -LLL -b "ou=Internal,${LDAP_BASE}" '(&(objectClass=mtCustomerOptionList)(cn=All Customer Options))' mtOption | \
-    get_attr_value 'mtOption' | sort > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Internal,${LDAP_BASE}" '(&(objectClass=mtCustomerOptionList)(cn=All Customer Options))' mtOption | \
+    get_attr_value 'mtOption' | sort > ${TMPFILE}
   # Count lines
-  OUTPUT=$(cat ${TMPFILE1} | wc -l)
-  assertEquals "Wrong number of customer options found" 8 "${OUTPUT}" || return
+  COUNT=$(cat ${TMPFILE} | wc -l)
+  assertEquals "Wrong number of customer options found" 8 "${COUNT}" || return
   # Compare to expected list
-  cmp ${TMPFILE1} <<EOT >/dev/null 2>&1
+  cmp ${TMPFILE} <<EOT >/dev/null 2>&1
 Classement
 Encodage HQ
 Filtrage Geoloc
@@ -163,27 +172,27 @@ EOT
 }
 
 test_Find_All_and_Online_Customers() {
-  local OUTPUT
+  local COUNT
 
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(objectClass=mtOrganization)' o > ${TMPFILE1}
-  OUTPUT=$(grep '^dn:' ${TMPFILE1} | wc -l)
-  assertEquals "Wrong number of total customers found" 5 "${OUTPUT}" || return
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(objectClass=mtOrganization)' o > ${TMPFILE}
+  COUNT=$(get_attr_value 'dn' ${TMPFILE} | wc -l)
+  assertEquals "Wrong number of total customers found" 5 "${COUNT}" || return
 
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(mtStatus=online))' o > ${TMPFILE1}
-  OUTPUT=$(grep '^dn:' ${TMPFILE1} | wc -l)
-  assertEquals "Wrong number of online customers found" 4 "${OUTPUT}"
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(mtStatus=online))' o > ${TMPFILE}
+  COUNT=$(get_attr_value 'dn' ${TMPFILE} | wc -l)
+  assertEquals "Wrong number of online customers found" 4 "${COUNT}"
 }
 
 test_Find_Customer() {
-  local OUTPUT RC
+  local RC
   
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=TBWA))' > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=TBWA))' > ${TMPFILE}
 
-  grep -qE '^dn: o=TBWA,ou=Customers,dc=mediatech,dc=fr$' ${TMPFILE1}
+  grep -qE '^dn: o=TBWA,ou=Customers,dc=mediatech,dc=fr$' ${TMPFILE}
   RC=$?
   assertTrue "Cannot find TBWA customer" "$RC" || return
 
-  grep -qE '^mtStatus: online$' ${TMPFILE1}
+  grep -qE '^mtStatus: online$' ${TMPFILE}
   RC=$?
   assertTrue "Cannot find customer attribute 'mtStatus'" "$RC"
 }
@@ -192,12 +201,12 @@ test_Find_Company_Options() {
   local RC COMPANY_DN OPTIONS
 
   # Find the customer "TBWA"
-  COMPANY_DN=$(ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=TBWA))' | get_attr_value 'dn')
+  COMPANY_DN=$(ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=TBWA))' | get_attr_value 'dn')
   # Find the customer's options
-  ldapsearch_admin -LLL -b "cn=options,${COMPANY_DN}" -s base '(objectClass=mtCustomerOptionList)' mtOption | \
-    get_attr_value 'mtOption' | sort > ${TMPFILE1}
+  ldapsearch_admin -b "cn=options,${COMPANY_DN}" -s base '(objectClass=mtCustomerOptionList)' mtOption | \
+    get_attr_value 'mtOption' | sort > ${TMPFILE}
   # Compare to expected list
-  cmp ${TMPFILE1} <<EOT >/dev/null 2>&1
+  cmp ${TMPFILE} <<EOT >/dev/null 2>&1
 Classement
 Webinar
 WebTV
@@ -207,75 +216,75 @@ EOT
 }
 
 test_Find_Mediatech() {
-  local OUTPUT RC
+  local COUNT VALUE RC
 
-  ldapsearch_admin -b "ou=Internal,$LDAP_BASE" -LLL '(objectClass=mtOrganization)' > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Internal,$LDAP_BASE" '(objectClass=mtOrganization)' > ${TMPFILE}
 
-  GREPOUT=$(grep -E '^dn:' ${TMPFILE1} | wc -l)
-  assertEquals "There should be only one company under ou=Internal" 1 "${GREPOUT}" || return
+  COUNT=$(grep -E '^dn:' ${TMPFILE} | wc -l)
+  assertEquals "There should be only one company under ou=Internal" 1 "${COUNT}" || return
 
-  GREPOUT=$(grep -E '^o:' ${TMPFILE1})
-  assertEquals "Cannot find Mediatech object" "o: Mediatech" "${GREPOUT}" 
+  VALUE=$(cat ${TMPFILE} | get_attr_value 'o')
+  assertEquals "Cannot find Mediatech object" "Mediatech" "${VALUE}" 
 }
 
 test_Modify_Company() {
-  local OUTPUT RC
+  local COUNT RC
 
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=TBWA)(mtStatus=online))' > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=TBWA)(mtStatus=online))' > ${TMPFILE}
 
-  GREPOUT=$(grep -E '^dn:' ${TMPFILE1} | wc -l)
-  assertEquals "Cannot find TBWA customer with online status" 1 "${GREPOUT}" || return
+  COUNT=$(grep -E '^dn:' ${TMPFILE} | wc -l)
+  assertEquals "Cannot find TBWA customer with online status" 1 "${COUNT}" || return
 
-  cat <<EOT > ${TMPFILE1}
+  cat <<EOT > ${TMPFILE}
 dn: o=TBWA,ou=Customers,dc=mediatech,dc=fr
 changetype: modify
 replace: mtStatus
 mtStatus: offline
 EOT
-  ldapmodify_admin -f ${TMPFILE1} >/dev/null
+  ldapmodify_admin -f ${TMPFILE} >/dev/null
   RC=$?
   assertTrue "LDAP modification failed" "$RC" || return
 
-  ldapsearch_admin -LLL '(&(objectClass=mtOrganization)(o=TBWA)(mtStatus=offline))' > ${TMPFILE1}
+  ldapsearch_admin '(&(objectClass=mtOrganization)(o=TBWA)(mtStatus=offline))' > ${TMPFILE}
 
-  GREPOUT=$(grep -E '^dn:' ${TMPFILE1} | wc -l)
-  assertEquals "Cannot find TBWA customer with offline status" 1 "${GREPOUT}"
+  COUNT=$(grep -E '^dn:' ${TMPFILE} | wc -l)
+  assertEquals "Cannot find TBWA customer with offline status" 1 "${COUNT}"
 }
 
 test_Find_Multiple_Companies() {
-  local OUTPUT RC ROOT_COMPANY_DN
+  local RC ROOT_COMPANY_DN
 
   # Find the root company "Autoworld"
-  ROOT_COMPANY_DN=$(ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=Autoworld))' | get_attr_value 'dn')
+  ROOT_COMPANY_DN=$(ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=Autoworld))' | get_attr_value 'dn')
   RC=$?
   assertTrue "Cannot find root company's DN" "$RC" || return
   assertEquals "o=Autoworld returned a wrong company" "o=Autoworld,ou=Customers,dc=mediatech,dc=fr" "${ROOT_COMPANY_DN}" || return
 
   # Now find the root company's sub-companies
-  ldapsearch_admin -LLL -b "${ROOT_COMPANY_DN}" -s one '(objectClass=mtOrganization)' o | get_attr_value 'o' | sort > ${TMPFILE1}
-  assertEquals "Wrong number of subcompanies" 2 $(cat ${TMPFILE1} | wc -l) || return
-  assertEquals "Subcompany one is not the expected name" "Autoworld France" "$(head -n 1 ${TMPFILE1})" || return
-  assertEquals "Subcompany two is not the expected name" "Autoworld Italy" "$(tail -n 1 ${TMPFILE1})" || return
+  ldapsearch_admin -b "${ROOT_COMPANY_DN}" -s one '(objectClass=mtOrganization)' o | get_attr_value 'o' | sort > ${TMPFILE}
+  assertEquals "Wrong number of subcompanies" 2 $(cat ${TMPFILE} | wc -l) || return
+  assertEquals "Subcompany one is not the expected name" "Autoworld France" "$(head -n 1 ${TMPFILE})" || return
+  assertEquals "Subcompany two is not the expected name" "Autoworld Italy" "$(tail -n 1 ${TMPFILE})" || return
 }
 
 test_Find_Regular_User_by_Uid() {
-  local OUTPUT RC
+  local VALUE RC
 
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=wsmith))' uid > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=wsmith))' uid > ${TMPFILE}
   RC=$?
   assertTrue "Cannot find Regular user" "$RC" || return
-  OUTPUT=$(cat ${TMPFILE1} | get_attr_value 'dn')
+  VALUE=$(cat ${TMPFILE} | get_attr_value 'dn')
   assertEquals "Cannot find regular user" \
-    "cn=Will Smith,o=Autoworld France,o=Autoworld,ou=Customers,${LDAP_BASE}" "${OUTPUT}"
+    "cn=Will Smith,o=Autoworld France,o=Autoworld,ou=Customers,${LDAP_BASE}" "${VALUE}"
 }
 
 test_Find_Regular_User_by_Uid_or_Alias() {
   local OUTPUT RC
 
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=johnny)(mtAlias=johnny)))' uid > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=johnny)(mtAlias=johnny)))' uid > ${TMPFILE}
   RC=$?
   assertTrue "Cannot find Regular user by alias" "$RC" || return
-  OUTPUT=$(cat ${TMPFILE1} | get_attr_value 'dn')
+  OUTPUT=$(cat ${TMPFILE} | get_attr_value 'dn')
   assertEquals "Search for user by alias returned wrong entry" \
     "cn=John Doe,o=Autoworld France,o=Autoworld,ou=Customers,${LDAP_BASE}" "${OUTPUT}"
 }
@@ -283,19 +292,19 @@ test_Find_Regular_User_by_Uid_or_Alias() {
 test_Find_Mediatech_User() {
   local OUTPUT RC
 
-  ldapsearch_admin -LLL -b "ou=Internal,$LDAP_BASE" '(&(objectClass=mtPerson)(uid=asimonneau))' > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Internal,$LDAP_BASE" '(&(objectClass=mtPerson)(uid=asimmons))' > ${TMPFILE}
   RC=$?
   assertTrue "Cannot find Mediatech user" "$RC" || return
-  OUTPUT=$(cat ${TMPFILE1} | get_attr_value 'dn')
-  assertEquals "Cannot find Mediatech user" "cn=Antony Simonneau,o=Mediatech,ou=Internal,${LDAP_BASE}" "${OUTPUT}"
+  OUTPUT=$(cat ${TMPFILE} | get_attr_value 'dn')
+  assertEquals "Cannot find Mediatech user" "cn=Anton Simmons,o=Mediatech,ou=Internal,${LDAP_BASE}" "${OUTPUT}"
 }
 
 test_Normal_User_Can_Only_Bind() {
   local OUTPUT RC USERDN
 
   # First find user by "uid" (or "mtAlias") in the "Customers" ou
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=wsmith)(mtAlias=wsmith)))' > ${TMPFILE1}
-  USERDN=$(cat ${TMPFILE1} | get_attr_value 'dn')
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=wsmith)(mtAlias=wsmith)))' > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
 
   # Should accept good password
   OUTPUT=$(${LDAPWHOAMI} -x -H ${LDAP_URI} -D "${USERDN}" -w pipo)
@@ -313,8 +322,8 @@ test_Change_User_Password_as_Admin() {
   local OUTPUT RC USERDN
 
   # First find user by "uid" (or "mtAlias") in the "Customers" ou
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=wsmith)(mtAlias=wsmith)))' > ${TMPFILE1}
-  USERDN=$(cat ${TMPFILE1} | get_attr_value 'dn')
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=wsmith)(mtAlias=wsmith)))' > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
 
   # Change the password
   ${LDAPPASSWD} -x -H "${LDAP_URI}" -D "${LDAP_ADMIN_DN}" -w "${LDAP_ADMIN_PW}" -a pipo -s goodsecret "$USERDN"
@@ -331,8 +340,8 @@ test_Mediatech_User_Can_Only_Bind() {
   local OUTPUT RC USERDN
 
   # First find user by "uid" (or "mtAlias") in the "Internal" ou
-  ldapsearch_admin -LLL -b "ou=Internal,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=antony)(mtAlias=antony)))' > ${TMPFILE1}
-  USERDN=$(cat ${TMPFILE1} | get_attr_value 'dn')
+  ldapsearch_admin -b "ou=Internal,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=anton)(mtAlias=anton)))' > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
   OUTPUT=$(${LDAPWHOAMI} -x -H ${LDAP_URI} -D "${USERDN}" -w pipo)
   RC=$?
   assertTrue "Mediatech user cannot authenticate correctly" "$RC" || return
@@ -344,13 +353,13 @@ test_Normal_User_Cannot_Spoof_Mediatech_Authentication() {
 
   # Try to find a Mediatech user by "uid" (or "mtAlias") in the "Customers" ou,
   # it should fail.
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=asimonneau)(mtAlias=asimonneau)))' > ${TMPFILE1}
-  USERDN=$(cat ${TMPFILE1} | get_attr_value 'dn')
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=asimmons)(mtAlias=asimmons)))' > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
   assertNull "A customer should not be able to authenticate as a mediatech user" "${USERDN}"
 }
 
 test_No_Anonymous_Access() {
-  ldapsearch_anon -LLL >/dev/null 2>&1
+  ldapsearch_anon >/dev/null 2>&1
   RC=$?
   assertFalse "Anonymous LDAP access should be denied" "$RC"
 }
@@ -359,12 +368,12 @@ test_Find_All_Admins() {
   local OUTPUT RC ORGDN
 
   # First find meta-company by name
-  ldapsearch_admin -LLL -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=Autoworld))' > ${TMPFILE1}
-  ORGDN=$(cat ${TMPFILE1} | get_attr_value 'dn')
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtOrganization)(o=Autoworld))' > ${TMPFILE}
+  ORGDN=$(cat ${TMPFILE} | get_attr_value 'dn')
   # Then find all admin in company and sub-companies
   # Only extract sorted "uid: ...." lines
-  ldapsearch_admin -LLL -b "${ORGDN}" '(&(objectClass=mtperson)(employeeType=admin))' uid | get_attr_value 'uid' | sort > ${TMPFILE2}
-  cmp ${TMPFILE2} <<-EOT >/dev/null 2>&1
+  ldapsearch_admin -b "${ORGDN}" '(&(objectClass=mtperson)(employeeType=admin))' uid | get_attr_value 'uid' | sort > ${TMPFILE}
+  cmp ${TMPFILE} <<-EOT >/dev/null 2>&1
 autoworldadmin
 jdoe
 EOT
@@ -376,15 +385,15 @@ test_Find_All_and_Used_Servers() {
   local OUTPUT
 
   # All Servers
-  ldapsearch_admin -LLL -b "ou=Servers,${LDAP_BASE}" '(objectClass=mtServer)' > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Servers,${LDAP_BASE}" '(objectClass=mtServer)' > ${TMPFILE}
   # Count servers
-  OUTPUT=$(grep '^dn:' ${TMPFILE1} | wc -l)
+  OUTPUT=$(grep '^dn:' ${TMPFILE} | wc -l)
   assertEquals "Wrong number of servers found" 3 "${OUTPUT}" || return
 
   # Used servers
-  ldapsearch_admin -LLL -b "ou=Servers,${LDAP_BASE}" '(&(objectClass=mtServer)(owner=*))' > ${TMPFILE1}
+  ldapsearch_admin -b "ou=Servers,${LDAP_BASE}" '(&(objectClass=mtServer)(owner=*))' > ${TMPFILE}
   # Count servers
-  OUTPUT=$(grep '^dn:' ${TMPFILE1} | wc -l)
+  OUTPUT=$(grep '^dn:' ${TMPFILE} | wc -l)
   assertEquals "Wrong number of servers found" 2 "${OUTPUT}"
 }
 
@@ -392,17 +401,82 @@ test_Find_Customer_Server() {
   local OUTPUT COMPANY_DN
 
   # Find the customer "TBWA"
-  COMPANY_DN=$(ldapsearch_admin -LLL '(&(objectClass=mtOrganization)(o=TBWA))' | sed -n -e 's/^dn: //p')
+  COMPANY_DN=$(ldapsearch_admin '(&(objectClass=mtOrganization)(o=TBWA))' | sed -n -e 's/^dn: //p')
   # Find TBWA's server
-  ldapsearch_admin -LLL -b "ou=Servers,${LDAP_BASE}" "(&(objectClass=mtServer)(owner=${COMPANY_DN}))" mtServerName > ${TMPFILE1}
-  OUTPUT=$(cat ${TMPFILE1} | sed -n -e 's/^mtServerName: //p')
+  ldapsearch_admin -b "ou=Servers,${LDAP_BASE}" "(&(objectClass=mtServer)(owner=${COMPANY_DN}))" mtServerName > ${TMPFILE}
+  OUTPUT=$(cat ${TMPFILE} | sed -n -e 's/^mtServerName: //p')
   assertEquals "Cannot find customer's server" "dedibox1" "${OUTPUT}"
 }
 
 test_Find_Unused_Servers() {
- ldapsearch_admin -LLL -b "ou=Servers,${LDAP_BASE}" "(&(objectClass=mtServer)(!(owner=*)))" mtServerName > ${TMPFILE1}
-  OUTPUT=$(cat ${TMPFILE1} | sed -n -e 's/^mtServerName: //p')
+ ldapsearch_admin -b "ou=Servers,${LDAP_BASE}" "(&(objectClass=mtServer)(!(owner=*)))" mtServerName > ${TMPFILE}
+  OUTPUT=$(cat ${TMPFILE} | sed -n -e 's/^mtServerName: //p')
   assertEquals "Cannot find unused server" "dedibox3" "${OUTPUT}"
+}
+
+test_Find_Mediatech_User_Rights() {
+  local OUTPUT RC USERDN
+
+  # First find user by "uid" (or "mtAlias") in the "Internal" ou
+  ldapsearch_admin -b "ou=Internal,${LDAP_BASE}" '(&(objectClass=mtPerson)(|(uid=anton)(mtAlias=anton)))' > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
+
+  # Find the rights list
+  ldapsearch_admin -b "${USERDN}" -s one '(objectClass=mtMediatechRight)' mtRightName | get_attr_value 'mtRightName' | sort > ${TMPFILE}
+  cmp ${TMPFILE} <<EOT >/dev/null 2>&1
+Admin Mediatech
+Annuaire
+Bookmarks
+ERP
+URL simplifiées
+EOT
+  RC=$?
+  assertTrue "Mediatech user's rights are incorrect" "$RC"
+
+  # Now check a single right's value
+  ldapsearch_admin -b "${USERDN}" -s one '(&(objectClass=mtMediatechRight)(mtRightName=ERP))' mtRightValue > ${TMPFILE}
+  OUTPUT=$(cat ${TMPFILE} | get_attr_value 'mtRightValue')
+  assertEquals "Mediatech user's right has an incorrect value" "admin" "${OUTPUT}" || return
+  ldapsearch_admin -b "${USERDN}" -s one '(&(objectClass=mtMediatechRight)(mtRightName=URL simplifiées))' mtRightValue > ${TMPFILE}
+  OUTPUT=$(cat ${TMPFILE} | get_attr_value 'mtRightValue')
+  assertEquals "Mediatech user's right has an incorrect value" "true" "${OUTPUT}"
+}
+
+test_Add_Server_Right_to_User() {
+  local RC USERDN
+
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=jdupond))' uid > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
+  assertEquals "Search for user by alias returned wrong entry" \
+    "cn=Jean Dupond,o=TBWA,ou=Customers,${LDAP_BASE}" "${USERDN}" || return
+
+  # Add a server right to user
+  cat <<EOT > ${TMPFILE}
+dn: mtServerName=dedibox1,${USERDN}
+changetype: add
+objectClass: mtServerRight
+objectClass: top
+mtServerName: dedibox1
+mtRightValue: user
+EOT
+  ldapmodify_admin -f ${TMPFILE} > /dev/null
+  RC=$?
+  assertTrue "LDAP modification failed" "$RC"
+}
+
+test_Find_Server_Right() {
+  local VALUE RC USERDN
+
+  # First find user
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=jdupond))' uid > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
+  assertEquals "Search for user returned wrong entry" \
+    "cn=Jean Dupond,o=TBWA,ou=Customers,${LDAP_BASE}" "${USERDN}" || return
+
+  # Now find the user's right on a specific server
+  ldapsearch_admin -b "${USERDN}" -s one '(&(objectClass=mtServerRight)(mtServerName=dedibox1))' mtRightValue > ${TMPFILE}
+  VALUE=$(cat ${TMPFILE} | get_attr_value 'mtRightValue')
+  assertEquals "Incorrect Server right" "user" "${VALUE}"
 }
 
 

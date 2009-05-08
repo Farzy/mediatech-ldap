@@ -138,6 +138,13 @@ objectClass (MediatechObjectClass:5
 	NAME 'mtServerRight'
 	DESC 'Description of a user right for a given server'
 	SUP  top STRUCTURAL
-	MUST ( mtServerName )
-	MAY  ( mtRightName $ mtRightType $ mtRightValue ) )
+	MUST ( mtServerName $ mtRightValue ) )
+
+# Mediatech's user rights
+objectClass (MediatechObjectClass:6
+	NAME 'mtMediatechRight'
+	DESC 'Description of a Mediatech user right'
+	SUP  top STRUCTURAL
+	MUST ( mtRightName $mtRightValue )
+	MAY  ( mtRightType ) )
 

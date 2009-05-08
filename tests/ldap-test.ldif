@@ -148,10 +148,8 @@ mtOption: readonly
 description: List of all authorized user types
 cn: All User Types
 
-dn: cn=Antony Simonneau,o=Mediatech,ou=Internal,dc=mediatech,dc=fr
-postalCode: 95123
+dn: cn=Anton Simmons,o=Mediatech,ou=Internal,dc=mediatech,dc=fr
 mobile: +33 6 12 34 56 78
-sn: Simonneau
 postalAddress: 1 rue de la Ville
 objectClass: mtPerson
 objectClass: inetOrgPerson
@@ -160,18 +158,20 @@ objectClass: person
 objectClass: top
 postOfficeBox: CEDEX 42
 c: France
-mail: antony.simonneau@mediatech.fr
 telephoneNumber: +33 1 54 32 65 76
-givenName: Antony
-uid: asimonneau
 employeeType: superadmin
-cn: Antony Simonneau
-mtAlias: antony
 title: Directeur Technique
-l: Montigny les Cormeilles
 facsimileTelephoneNumber: +33 1 65 87 93 21
 userPassword:: e1NTSEF9OE1jWHRLK050c0R3SXJaZDhOVXoyWjdYQzlTd1oyaDYyK1l4NGc9PQ=
  =
+cn: Anton Simmons
+sn: Simmons
+givenName: Anton
+l: Versailles
+mtAlias: anton
+postalCode: 78001
+uid: asimmons
+mail: anton.simmons@mediatech.fr
 
 dn: ou=Servers,dc=mediatech,dc=fr
 objectClass: organizationalUnit
@@ -332,4 +332,44 @@ mtOption: Webinar
 mtOption: WebTV
 mtOption: Classement
 cn: options
+
+dn:: bXRSaWdodE5hbWU9VVJMIHNpbXBsaWZpw6llcyxjbj1BbnRvbiBTaW1tb25zLG89TWVkaWF0Z
+ WNoLG91PUludGVybmFsLGRjPW1lZGlhdGVjaCxkYz1mcg==
+objectClass: mtMediatechRight
+objectClass: top
+mtRightName:: VVJMIHNpbXBsaWZpw6llcw==
+mtRightValue: true
+mtRightType: boolean
+
+dn: mtRightName=ERP,cn=Anton Simmons,o=Mediatech,ou=Internal,dc=mediatech,dc=f
+ r
+objectClass: mtMediatechRight
+objectClass: top
+mtRightName: ERP
+mtRightValue: admin
+mtRightType: string
+
+dn: mtRightName=Annuaire,cn=Anton Simmons,o=Mediatech,ou=Internal,dc=mediatech
+ ,dc=fr
+objectClass: mtMediatechRight
+objectClass: top
+mtRightName: Annuaire
+mtRightValue: true
+mtRightType: boolean
+
+dn: mtRightName=Bookmarks,cn=Anton Simmons,o=Mediatech,ou=Internal,dc=mediatec
+ h,dc=fr
+objectClass: mtMediatechRight
+objectClass: top
+mtRightName: Bookmarks
+mtRightValue: true
+mtRightType: boolean
+
+dn: mtRightName=Admin Mediatech,cn=Anton Simmons,o=Mediatech,ou=Internal,dc=me
+ diatech,dc=fr
+objectClass: mtMediatechRight
+objectClass: top
+mtRightName: Admin Mediatech
+mtRightValue: true
+mtRightType: boolean
 
