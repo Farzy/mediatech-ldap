@@ -446,10 +446,10 @@ EOT
 test_Add_Server_Right_to_User() {
   local RC USERDN
 
-  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=jdupond))' uid > ${TMPFILE}
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=mduc))' uid > ${TMPFILE}
   USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
   assertEquals "Search for user by alias returned wrong entry" \
-    "cn=Jean Dupond,o=TBWA,ou=Customers,${LDAP_BASE}" "${USERDN}" || return
+    "cn=Michel Duc,o=TBWA,ou=Customers,${LDAP_BASE}" "${USERDN}" || return
 
   # Add a server right to user
   cat <<EOT > ${TMPFILE}
@@ -465,14 +465,47 @@ EOT
   assertTrue "LDAP modification failed" "$RC"
 }
 
+test_Cannot_Add_Server_Right_to_User_Twice() {
+  local RC USERDN
+
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=mduc))' uid > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
+  assertEquals "Search for user by alias returned wrong entry" \
+    "cn=Michel Duc,o=TBWA,ou=Customers,${LDAP_BASE}" "${USERDN}" || return
+
+  # Add a server right to user
+  cat <<EOT > ${TMPFILE}
+dn: mtServerName=dedibox1,${USERDN}
+changetype: add
+objectClass: mtServerRight
+objectClass: top
+mtServerName: dedibox1
+mtRightValue: user
+EOT
+  ldapmodify_admin -f ${TMPFILE} > /dev/null
+  RC=$?
+  assertFalse "LDAP modification should have failed" "$RC"
+}
+
 test_Find_Server_Right() {
   local VALUE RC USERDN
 
-  # First find user
+  # First find user jdupond
   ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=jdupond))' uid > ${TMPFILE}
   USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
   assertEquals "Search for user returned wrong entry" \
     "cn=Jean Dupond,o=TBWA,ou=Customers,${LDAP_BASE}" "${USERDN}" || return
+
+  # Now find the user's right on a specific server
+  ldapsearch_admin -b "${USERDN}" -s one '(&(objectClass=mtServerRight)(mtServerName=dedibox1))' mtRightValue > ${TMPFILE}
+  VALUE=$(cat ${TMPFILE} | get_attr_value 'mtRightValue')
+  assertEquals "Incorrect Server right" "admin" "${VALUE}"
+
+  # First find user mduc
+  ldapsearch_admin -b "ou=Customers,${LDAP_BASE}" '(&(objectClass=mtPerson)(uid=mduc))' uid > ${TMPFILE}
+  USERDN=$(cat ${TMPFILE} | get_attr_value 'dn')
+  assertEquals "Search for user returned wrong entry" \
+    "cn=Michel Duc,o=TBWA,ou=Customers,${LDAP_BASE}" "${USERDN}" || return
 
   # Now find the user's right on a specific server
   ldapsearch_admin -b "${USERDN}" -s one '(&(objectClass=mtServerRight)(mtServerName=dedibox1))' mtRightValue > ${TMPFILE}

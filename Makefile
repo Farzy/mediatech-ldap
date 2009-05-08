@@ -35,7 +35,7 @@ install_config:
 
 export_ldap:
 	@echo "Exportation de la base LDAP de production en fichier LDIF de test"
-	slapcat | grep -Ev "(structuralObjectClass|entryUUID|creatorsName|createTimestamp|entryCSN|modifiersName|modifyTimestamp)" > $(TEST_DIR)/ldap-test.ldif
+	slapcat | grep -Ev "(structuralObjectClass|entryUUID|creatorsName|createTimestamp|entryCSN|modifiersName|modifyTimestamp|contextCSN)" > $(TEST_DIR)/ldap-test.ldif
 
 sync_src:
 	@echo "Copie du répertoire de développement sur ldap2"

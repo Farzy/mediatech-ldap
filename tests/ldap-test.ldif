@@ -313,17 +313,17 @@ cn: Autoworld MetaAdmin
 dn: o=Oldy,ou=Customers,dc=mediatech,dc=fr
 postalCode: 92100
 o: Oldy
-facsimileTelephoneNumber: +33 1 43 54 11 11
 l: Boulogne Billancourt
 postalAddress: 162-164 rue de Billancourt
 objectClass: mtOrganization
 objectClass: organization
 objectClass: top
 telephoneNumber: +33 1 45 11 22 33
-uid: 35345
 mtMonthlyQuota: 10
 c: France
 mtStatus: archived
+uid: 35343
+facsimileTelephoneNumber: +33 1 43 54 11 12
 
 dn: cn=options,o=Oldy,ou=Customers,dc=mediatech,dc=fr
 objectClass: mtCustomerOptionList
@@ -372,4 +372,19 @@ objectClass: top
 mtRightName: Admin Mediatech
 mtRightValue: true
 mtRightType: boolean
+
+dn: mtServerName=dedibox1,cn=Jean Dupond,o=TBWA,ou=Customers,dc=mediatech,dc=f
+ r
+objectClass: mtServerRight
+objectClass: top
+mtServerName: dedibox1
+mtRightValue: admin
+
+dn: cn=replicator,dc=mediatech,dc=fr
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: replicator
+description: LDAP replicator account
+userPassword:: e1NTSEF9S3lQSnVMN2hLMzdoTnQyQUtwOVppSFRQUjlLSlFXNFBqKytRMWc9PQ=
+ =
 
