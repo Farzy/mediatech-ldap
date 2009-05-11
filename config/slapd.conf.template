@@ -1,7 +1,6 @@
 # This is the main slapd configuration file. See slapd.conf(5) for more
 # info on the configuration options.
 
-#######################################################################
 # Global Directives:
 
 # Features to permit
@@ -45,8 +44,7 @@ TLSCertificateKeyFile /etc/ldap/mediatech-ldap.key
 TLSVerifyClient never
 
 # Replication configuration
-serverid	1	ldaps://ldap1.mediatech.fr:636
-serverid	2	ldaps://ldap2.mediatech.fr:636
+serverid	@@SERVER_NUMBER@@	ldaps://@@SERVER_NAME@@.mediatech.fr:636
 
 #######################################################################
 # Specific Backend Directives for hdb:
@@ -122,22 +120,7 @@ syncprov-sessionlog 100
 limits dn.exact="cn=replicator,dc=mediatech,dc=fr" time.soft=unlimited time.hard=unlimited size.soft=unlimited size.hard=unlimited
 
 syncRepl rid=1
-        provider=ldaps://ldap1.mediatech.fr:636
-        binddn="cn=replicator,dc=mediatech,dc=fr"
-        bindmethod=simple
-        credentials=R3pl1cat3
-        searchbase="dc=mediatech,dc=fr"
-        type=refreshAndPersist
-        retry="30 10 300 +"
-        interval=00:00:00:10
-	schemachecking=on
-	tls_cacert=/etc/ssl/certs/ca-certificates.crt
-	tls_cert=/etc/ldap/mediatech-ldap.crt
-	tls_key=/etc/ldap/mediatech-ldap.key
-	tls_reqcert=demand
-
-syncRepl rid=2
-        provider=ldaps://ldap2.mediatech.fr:636
+        provider=ldaps://@@SERVER_NAME_OTHER@@.mediatech.fr:636
         binddn="cn=replicator,dc=mediatech,dc=fr"
         bindmethod=simple
         credentials=R3pl1cat3
