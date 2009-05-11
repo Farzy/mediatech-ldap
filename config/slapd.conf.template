@@ -29,6 +29,8 @@ modulepath	/usr/lib/ldap
 moduleload	back_hdb
 moduleload	syncprov
 moduleload	back_monitor
+moduleload	unique
+moduleload	constraint
 
 # The maximum number of entries that is returned for a search operation
 sizelimit 500
@@ -115,6 +117,17 @@ index           entryUUID       eq
 overlay syncprov
 syncprov-checkpoint 100 10
 syncprov-sessionlog 100
+
+# Unique IDs
+overlay		unique
+# "uid" must be unique for mtOrganiation
+unique_uri	ldap:///?uid?sub?(objectClass=mtOrganization)
+# "uid", "mtAlias" and "mail" must be unique for mtPerson
+unique_uri	ldap:///?uid,mtAlias,mail?sub?(objectClass=mtPerson)
+
+# Constraints
+overlay		constraint
+constraint_attribute mail regex "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$"
 
 # Let the replica DN have limitless searches
 limits dn.exact="cn=replicator,dc=mediatech,dc=fr" time.soft=unlimited time.hard=unlimited size.soft=unlimited size.hard=unlimited

@@ -260,6 +260,7 @@ cn: Michel Duc
 title: Webmaster
 userPassword:: e1NTSEF9dWZyZkZrMHBqd2JFKy96VXFHUFhYVHVKTTBCenFRQlR1elE1dmc9PQ=
  =
+mtAlias: michel
 
 dn: cn=John Doe,o=Autoworld France,o=Autoworld,ou=Customers,dc=mediatech,dc=fr
 sn: Dupond
@@ -321,9 +322,9 @@ objectClass: top
 telephoneNumber: +33 1 45 11 22 33
 c: France
 mtStatus: archived
-uid: 35343
 facsimileTelephoneNumber: +33 1 43 54 11 15
 mtMonthlyQuota: 30
+uid: 35343
 
 dn: cn=options,o=Oldy,ou=Customers,dc=mediatech,dc=fr
 objectClass: mtCustomerOptionList

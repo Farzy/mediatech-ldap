@@ -149,6 +149,43 @@ test_SSL_Connection() {
   assertTrue "Cannot connect to LDAP/SSL or certificate chain invalid" "$RC"
 }
 
+test_read_write_access() {
+  local RC
+
+  # cn=admin can write
+  cat <<EOT > ${TMPFILE}
+dn: ou=test-ou,${LDAP_BASE}
+changetype: add
+objectClass: organizationalUnit
+objectClass: top
+ou: test-ou
+EOT
+  ldapmodify_admin -f ${TMPFILE} > /dev/null
+  RC=$?
+  assertTrue "Account cn=admin cannot write to LDAP" "$RC"
+
+  # cn=reader can only read
+  ${LDAPSEARCH} -LLL -x -H "${LDAP_URI}" -b "${LDAP_BASE}" -D "${LDAP_READER_DN}" -w "${LDAP_READER_PW}" "(&(objectClass=organizationalUnit)(ou=test-ou))" ou > ${TMPFILE}
+  RC=$?
+  assertTrue "Account cn=reader cannot read LDAP" "$RC"
+  cat <<EOT > ${TMPFILE}
+dn: ou=test-ou2,${LDAP_BASE}
+changetype: add
+objectClass: organizationalUnit
+objectClass: top
+ou: test-ou2
+EOT
+  ${LDAPMODIFY} -x -H "${LDAP_URI}" -D "${LDAP_READER_DN}" -w "${LDAP_READER_PW}" -f ${TMPFILE} > /dev/null 2>&1
+  RC=$?
+  assertFalse "Account cn=reader can write to LDAP!" "$RC"
+}
+
+test_No_Anonymous_Access() {
+  ldapsearch_anon >/dev/null 2>&1
+  RC=$?
+  assertFalse "Anonymous LDAP access should be denied" "$RC"
+}
+
 test_Find_All_Customer_Options() {
   local COUNT
 
@@ -359,12 +396,6 @@ test_Normal_User_Cannot_Spoof_Mediatech_Authentication() {
   assertNull "A customer should not be able to authenticate as a mediatech user" "${USERDN}"
 }
 
-test_No_Anonymous_Access() {
-  ldapsearch_anon >/dev/null 2>&1
-  RC=$?
-  assertFalse "Anonymous LDAP access should be denied" "$RC"
-}
-
 test_Find_All_Admins() {
   local OUTPUT RC ORGDN
 
@@ -511,6 +542,101 @@ test_Find_Server_Right() {
   ldapsearch_admin -b "${USERDN}" -s one '(&(objectClass=mtServerRight)(mtServerName=dedibox1))' mtRightValue > ${TMPFILE}
   VALUE=$(cat ${TMPFILE} | get_attr_value 'mtRightValue')
   assertEquals "Incorrect Server right" "user" "${VALUE}"
+}
+
+test_unique_ids() {
+  local RC
+
+  # Unique UID for customers
+  cat <<EOT > ${TMPFILE}
+dn: o=NotUnique,ou=Customers,dc=mediatech,dc=fr
+changetype: add
+objectClass: mtOrganization
+objectClass: organization
+objectClass: top
+mtStatus: online
+o: NotUnique
+uid: 35343
+EOT
+  ldapmodify_admin -f ${TMPFILE} > /dev/null
+  RC=$?
+  assertFalse "Unique organization's uid violation" "$RC"
+
+  # Unique UID for people
+  cat <<EOT > ${TMPFILE}
+dn: cn=Michel Duc 2,o=TBWA,ou=Customers,dc=mediatech,dc=fr
+changetype: add
+objectClass: inetOrgPerson
+objectClass: mtPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Michel Duc 2
+sn: Dupond
+uid: mduc
+EOT
+  ldapmodify_admin -f ${TMPFILE} > /dev/null
+  RC=$?
+  assertFalse "Unique person's uid violation" "$RC"
+
+  # Unique mtAlias for people
+  cat <<EOT > ${TMPFILE}
+dn: cn=Michel Duc 2,o=TBWA,ou=Customers,dc=mediatech,dc=fr
+changetype: add
+objectClass: inetOrgPerson
+objectClass: mtPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Michel Duc 2
+sn: Dupond
+uid: mduc2
+mtAlias: michel
+EOT
+  ldapmodify_admin -f ${TMPFILE} > /dev/null
+  RC=$?
+  assertFalse "Unique person's alias violation" "$RC"
+
+  # Unique mail for people
+  cat <<EOT > ${TMPFILE}
+dn: cn=Michel Duc 2,o=TBWA,ou=Customers,dc=mediatech,dc=fr
+changetype: add
+objectClass: inetOrgPerson
+objectClass: mtPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Michel Duc 2
+sn: Dupond
+uid: mduc2
+mail: mduc@tbwa.fr
+EOT
+  ldapmodify_admin -f ${TMPFILE} > /dev/null
+  RC=$?
+  assertFalse "Unique person's mail violation" "$RC"
+
+}
+
+test_valid_mail() {
+  local RC
+
+  # Valid mail for people
+  cat <<EOT > ${TMPFILE}
+dn: cn=Michel Duc 2,o=TBWA,ou=Customers,dc=mediatech,dc=fr
+changetype: add
+objectClass: inetOrgPerson
+objectClass: mtPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Michel Duc 2
+sn: Dupond
+uid: mduc2
+mail: xx@tt
+EOT
+  ldapmodify_admin -f ${TMPFILE} > /dev/null
+  RC=$?
+  assertFalse "Email syntax violation" "$RC"
 }
 
 
