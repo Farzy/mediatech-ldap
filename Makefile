@@ -34,6 +34,7 @@ all:
 	@echo " make tests : lance les tests"
 	@echo " make install_schema : installe le schéma LDAP Mediatech en production"
 	@echo " make install_config : installe les fichier de configuration slapd.conf, ldap.conf et le cron de backup en production"
+	@echo " make install_monit : installe le fichier de configuration Monit et redémarre celui-ci"
 	@echo " make export_ldap : Recrée la base LDIF de test à partir de la base de production"
 	@echo " make diag : affiche quelques infos sur le Makefile"
 
@@ -70,6 +71,12 @@ install_config: create_config
 	cp config/ldap.conf /etc/ldap
 	cp config/openldap-backup.cron /etc/cron.d/openldap-backup
 	/etc/init.d/slapd restart
+
+install_monit:
+	@echo "Mise à jour de la configuration Monit"
+	cp config/monit /etc/default/monit
+	cp config/monitrc /etc/monit/monitrc
+	/etc/init.d/monit restart
 
 export_ldap:
 	@echo "Exportation de la base LDAP de production en fichier LDIF de test"
