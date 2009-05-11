@@ -95,7 +95,7 @@ set mail-format {
 # set alert manager@foo.bar only on { timeout }  # receive just service-
 #                                                # timeout alert
 
-set alert ffarid@pragmatic-source.com with reminder on 5 cycles
+set alert ffarid@pragmatic-source.com with reminder on 60 cycles
 
 #
 #
@@ -225,10 +225,21 @@ set alert ffarid@pragmatic-source.com with reminder on 5 cycles
 #
 
 check process slapd with pidfile /var/run/slapd/slapd.pid
+  group ldap
   start "/etc/init.d/slapd start"
   stop "/etc/init.d/slapd stop"
   if failed port 636 type tcpssl protocol ldap3 then restart
   if 5 restarts within 5 cycles then timeout
+
+check host ldap1 with address ldap1.mediatech.fr
+  group ldap
+  if failed icmp type echo with timeout 15 seconds then alert
+  if failed port 636 type tcpssl protocol ldap3 then alert
+
+check host ldap2 with address ldap2.mediatech.fr
+  group ldap
+  if failed icmp type echo with timeout 15 seconds then alert
+  if failed port 636 type tcpssl protocol ldap3 then alert
 
 
 ###############################################################################
