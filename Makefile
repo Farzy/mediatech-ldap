@@ -3,27 +3,40 @@
 
 
 TEST_DIR	:= $(shell pwd)/tests
-SERVER_NAME	:= $(shell hostname)
+SERVER_NAME	:= $(shell hostname --fqdn)
 
-##############################################################"
-# Détermine le nom du serveur LDAP qui complète celui-ci.
-# Par convention, si le nom du premier se
-# termine par "1", le nom de l'autre doit se terminer par "2".
-TEST_HOSTNAME1 := $(SERVER_NAME:%1=)
-TEST_HOSTNAME2 := $(SERVER_NAME:%2=)
-ifeq "$(TEST_HOSTNAME1)" ''
-    # On est sur la machine dont le nom se finit par "1"
-    SERVER_NAME_OTHER := $(SERVER_NAME:%1=%2)
+###############################################################"
+## Détermine le nom du serveur LDAP qui complète celui-ci.
+## Par convention, si le nom du premier se
+## termine par "1", le nom de l'autre doit se terminer par "2".
+#TEST_HOSTNAME1 := $(SERVER_NAME:%1=)
+#TEST_HOSTNAME2 := $(SERVER_NAME:%2=)
+#ifeq "$(TEST_HOSTNAME1)" ''
+#    # On est sur la machine dont le nom se finit par "1"
+#    SERVER_NAME_OTHER := $(SERVER_NAME:%1=%2)
+#    SERVER_NUMBER := 1
+#else ifeq "$(TEST_HOSTNAME2)" ''
+#    # On est sur la machine dont le nom se finit par "2"
+#    SERVER_NAME_OTHER := $(SERVER_NAME:%2=%1)
+#    SERVER_NUMBER := 2
+#else
+#    # Le nom de cette machine ne se finit par par "1" ou "2" !
+#    $(error Ce Makefile ne peut fonctionner que si le nom du serveur LDAP se finit par '1' ou '2')
+#endif
+###############################################################"
+# local.streamlike & www.abruti.org
+ifeq "$(SERVER_HOSTNAME)" 'local.streamlike.com'
+    # On est sur la machine 1
+    SERVER_NAME_OTHER := www.abruti.org
     SERVER_NUMBER := 1
-else ifeq "$(TEST_HOSTNAME2)" ''
-    # On est sur la machine dont le nom se finit par "2"
-    SERVER_NAME_OTHER := $(SERVER_NAME:%2=%1)
+else ifeq "$(SERVER_HOSTNAME)" 'www.abruti.org'
+    # On est sur la machine 2
+    SERVER_NAME_OTHER := local.streamlike.com
     SERVER_NUMBER := 2
 else
-    # Le nom de cette machine ne se finit par par "1" ou "2" !
-    $(error Ce Makefile ne peut fonctionner que si le nom du serveur LDAP se finit par '1' ou '2')
+    $(error Je ne trouve pas les noms de machines.)
 endif
-##############################################################"
+
 
 export TEST_DIR SERVER_NAME SERVER_NAME_OTHER SERVER_NUMBER
 
