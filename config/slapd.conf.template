@@ -46,7 +46,7 @@ TLSCertificateKeyFile /etc/ldap/mediatech-ldap.key
 TLSVerifyClient never
 
 # Replication configuration
-serverid	@@SERVER_NUMBER@@	ldaps://@@SERVER_NAME@@.mediatech.fr:636
+serverid	@@SERVER_NUMBER@@	ldaps://@@SERVER_NAME@@:636
 
 #######################################################################
 # Specific Backend Directives for hdb:
@@ -133,7 +133,7 @@ constraint_attribute mail regex "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4
 limits dn.exact="cn=replicator,dc=mediatech,dc=fr" time.soft=unlimited time.hard=unlimited size.soft=unlimited size.hard=unlimited
 
 syncRepl rid=1
-        provider=ldaps://@@SERVER_NAME_OTHER@@.mediatech.fr:636
+        provider=ldaps://@@SERVER_NAME_OTHER@@:636
         binddn="cn=replicator,dc=mediatech,dc=fr"
         bindmethod=simple
         credentials=R3pl1cat3
