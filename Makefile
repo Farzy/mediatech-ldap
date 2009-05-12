@@ -1,40 +1,36 @@
 # Contrôle des tests et installation de fichiers pour le
 # projet OpenLDAP
 
+###############################################################"
+# Configurer ici le nom des 2 serveurs LDAP avant d'utiliser
+# ce Makefile.
+###############################################################"
+#SERVER_1	:= ldap1.mediatech.fr
+#SERVER_2	:= ldap2.mediatech.fr
+SERVER_1	:= local.streamlike.com
+SERVER_2	:= www.abruti.org
 
+###############################################################
+# Il n'y a normalement plus rien à configurer ci-dessous
+
+# Sous-Répertoire de test
 TEST_DIR	:= $(shell pwd)/tests
+# Nom du serveur courant
 SERVER_NAME	:= $(shell hostname --fqdn)
 
 ###############################################################"
-## Détermine le nom du serveur LDAP qui complète celui-ci.
-## Par convention, si le nom du premier se
-## termine par "1", le nom de l'autre doit se terminer par "2".
-#TEST_HOSTNAME1 := $(SERVER_NAME:%1=)
-#TEST_HOSTNAME2 := $(SERVER_NAME:%2=)
-#ifeq "$(TEST_HOSTNAME1)" ''
-#    # On est sur la machine dont le nom se finit par "1"
-#    SERVER_NAME_OTHER := $(SERVER_NAME:%1=%2)
-#    SERVER_NUMBER := 1
-#else ifeq "$(TEST_HOSTNAME2)" ''
-#    # On est sur la machine dont le nom se finit par "2"
-#    SERVER_NAME_OTHER := $(SERVER_NAME:%2=%1)
-#    SERVER_NUMBER := 2
-#else
-#    # Le nom de cette machine ne se finit par par "1" ou "2" !
-#    $(error Ce Makefile ne peut fonctionner que si le nom du serveur LDAP se finit par '1' ou '2')
-#endif
+# Détermine si on est sur le serveur 1 ou 2
 ###############################################################"
-# local.streamlike & www.abruti.org
-ifeq "$(SERVER_NAME)" 'local.streamlike.com'
+ifeq ($(SERVER_NAME), $(SERVER_1))
     # On est sur la machine 1
-    SERVER_NAME_OTHER := www.abruti.org
+    SERVER_NAME_OTHER := $(SERVER_2)
     SERVER_NUMBER := 1
-else ifeq "$(SERVER_NAME)" 'www.abruti.org'
+else ifeq ($(SERVER_NAME), $(SERVER_2))
     # On est sur la machine 2
-    SERVER_NAME_OTHER := local.streamlike.com
+    SERVER_NAME_OTHER := $(SERVER_1)
     SERVER_NUMBER := 2
 else
-    $(error Je ne trouve pas les noms de machines.)
+    $(error Je ne trouve pas les noms de machines. Veuillez modifier ce Makefile pour configurer SERVER_1 et SERVER_2)
 endif
 
 
@@ -44,6 +40,7 @@ export TEST_DIR SERVER_NAME SERVER_NAME_OTHER SERVER_NUMBER
 
 all:
 	@echo "Commandes disponibles :"
+	@echo " make archive : crée une archive des sources et tests du répertoire courant"
 	@echo " make tests : lance les tests"
 	@echo " make install_schema : installe le schéma LDAP Mediatech en production"
 	@echo " make install_config : installe les fichier de configuration slapd.conf, ldap.conf et le cron de backup en production"
@@ -54,6 +51,10 @@ all:
 
 diag:
 	@echo test_dir : $(TEST_DIR)
+
+archive:
+	echo "Création de l'archive ../mediatech-ldap-$(shell date +%Y%m%d-%H%M).tar.gz"
+	cd .. && tar -czf mediatech-ldap-$(shell date +%Y%m%d-%H%M).tar.gz --exclude ".git*" --exclude "*.swp" $(notdir $(PWD))
 
 tests: create_config
 	@echo Running tests...
