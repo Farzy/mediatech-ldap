@@ -25,11 +25,11 @@ SERVER_NAME	:= $(shell hostname --fqdn)
 #endif
 ###############################################################"
 # local.streamlike & www.abruti.org
-ifeq "$(SERVER_HOSTNAME)" 'local.streamlike.com'
+ifeq "$(SERVER_NAME)" 'local.streamlike.com'
     # On est sur la machine 1
     SERVER_NAME_OTHER := www.abruti.org
     SERVER_NUMBER := 1
-else ifeq "$(SERVER_HOSTNAME)" 'www.abruti.org'
+else ifeq "$(SERVER_NAME)" 'www.abruti.org'
     # On est sur la machine 2
     SERVER_NAME_OTHER := local.streamlike.com
     SERVER_NUMBER := 2
