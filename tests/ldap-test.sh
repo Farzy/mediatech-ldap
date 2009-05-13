@@ -55,6 +55,7 @@ oneTimeSetUp() {
   cp ${TEST_DIR}/../config/*.conf ${LDAP_CONFDIR}/
   sed -i -e "s#/etc/ldap#${LDAP_CONFDIR}#g" \
     -e "s#/var/run/slapd#${LDAP_RUNDIR}#g" \
+    -e "s#636#${LDAP_PORT}#g" \
     -e "s#/var/lib/ldap#${LDAP_DBDIR}#g" ${LDAP_CONFDIR}/slapd.conf
   chown openldap:openldap $LDAP_RUNDIR $LDAP_DBDIR
   chmod 755 $LDAP_RUNDIR $LDAP_DBDIR
