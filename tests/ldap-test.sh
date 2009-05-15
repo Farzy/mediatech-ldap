@@ -62,6 +62,7 @@ oneTimeSetUp() {
   # The test LDAP server will be started by the first test,
   # just kill an eventually forgotten test server
   fuser -k 10389/tcp
+  fuser -k 10636/tcp
 
   # Some temporary filenames
   TMPFILE=${shunit_tmpDir}/tmpfile
